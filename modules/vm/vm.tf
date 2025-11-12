@@ -1,92 +1,59 @@
-resource "azurerm_virtual_network" "main" {
-  name                = var.vnet_name
-  address_space       = var.vnet_address_space
+resource "azurerm_public_ip" "main" {
+  name                = "${var.vm_name}-pip"
   location            = var.location
   resource_group_name = var.resource_group_name
+  allocation_method   = "Dynamic"
 
   tags = var.tags
 }
 
-resource "azurerm_subnet" "main" {
-  name                 = var.subnet_name
-  resource_group_name  = var.resource_group_name
-  virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = var.subnet_address_prefixes
-}
-
-resource "azurerm_network_security_group" "main" {
-  name                = "${var.vnet_name}-nsg"
+resource "azurerm_network_interface" "main" {
+  name                = "${var.vm_name}-nic"
   location            = var.location
   resource_group_name = var.resource_group_name
 
-  security_rule {
-    name                       = "SSH"
-    priority                   = 1001
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "22"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  security_rule {
-    name                       = "HTTP"
-    priority                   = 1002
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "80"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = var.subnet_id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.main.id
   }
 
   tags = var.tags
 }
 
-resource "azurerm_subnet_network_security_group_association" "main" {
-  subnet_id                 = azurerm_subnet.main.id
-  network_security_group_id = azurerm_network_security_group.main.id
+resource "tls_private_key" "ssh" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
 }
 
+resource "azurerm_linux_virtual_machine" "main" {
+  name                = var.vm_name
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  size                = var.vm_size
+  admin_username      = var.admin_username
 
+  network_interface_ids = [
+    azurerm_network_interface.main.id,
+  ]
 
-### `modules/vnet/variables.tf`
-```hcl
-variable "resource_group_name" {
-  description = "Name of the resource group"
-  type        = string
-}
+  admin_ssh_key {
+    username   = var.admin_username
+    public_key = tls_private_key.ssh.public_key_openssh
+  }
 
-variable "location" {
-  description = "Azure region for resources"
-  type        = string
-}
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
 
-variable "vnet_name" {
-  description = "Name of the virtual network"
-  type        = string
-}
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-focal"
+    sku       = "20_04-lts-gen2"
+    version   = "latest"
+  }
 
-variable "vnet_address_space" {
-  description = "Address space for the virtual network"
-  type        = list(string)
-}
-
-variable "subnet_name" {
-  description = "Name of the subnet"
-  type        = string
-}
-
-variable "subnet_address_prefixes" {
-  description = "Address prefixes for the subnet"
-  type        = list(string)
-}
-
-variable "tags" {
-  description = "Tags to apply to resources"
-  type        = map(string)
-  default     = {}
+  tags = var.tags
 }
