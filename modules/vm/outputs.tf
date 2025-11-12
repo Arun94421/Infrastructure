@@ -1,24 +1,30 @@
-output "vnet_id" {
-  description = "ID of the virtual network"
-  value       = azurerm_virtual_network.main.id
+output "vm_id" {
+  description = "ID of the virtual machine"
+  value       = azurerm_linux_virtual_machine.main.id
 }
 
-output "vnet_name" {
-  description = "Name of the virtual network"
-  value       = azurerm_virtual_network.main.name
+output "vm_name" {
+  description = "Name of the virtual machine"
+  value       = azurerm_linux_virtual_machine.main.name
 }
 
-output "subnet_id" {
-  description = "ID of the subnet"
-  value       = azurerm_subnet.main.id
+output "public_ip_address" {
+  description = "Public IP address of the VM"
+  value       = azurerm_public_ip.main.ip_address
 }
 
-output "subnet_name" {
-  description = "Name of the subnet"
-  value       = azurerm_subnet.main.name
+output "private_ip_address" {
+  description = "Private IP address of the VM"
+  value       = azurerm_network_interface.main.private_ip_address
 }
 
-output "nsg_id" {
-  description = "ID of the network security group"
-  value       = azurerm_network_security_group.main.id
+output "ssh_private_key" {
+  description = "Private SSH key to connect to the VM"
+  value       = tls_private_key.ssh.private_key_pem
+  sensitive   = true
+}
+
+output "ssh_connection_string" {
+  description = "SSH connection string"
+  value       = "ssh -i private_key.pem ${var.admin_username}@${azurerm_public_ip.main.ip_address}"
 }
