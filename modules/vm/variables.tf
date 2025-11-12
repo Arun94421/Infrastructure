@@ -8,24 +8,24 @@ variable "location" {
   type        = string
 }
 
-variable "vnet_name" {
-  description = "Name of the virtual network"
+variable "vm_name" {
+  description = "Name of the virtual machine"
   type        = string
 }
 
-variable "vnet_address_space" {
-  description = "Address space for the virtual network"
-  type        = list(string)
-}
-
-variable "subnet_name" {
-  description = "Name of the subnet"
+variable "vm_size" {
+  description = "Size of the virtual machine"
   type        = string
 }
 
-variable "subnet_address_prefixes" {
-  description = "Address prefixes for the subnet"
-  type        = list(string)
+variable "admin_username" {
+  description = "Admin username for the VM"
+  type        = string
+}
+
+variable "subnet_id" {
+  description = "ID of the subnet to attach the VM to"
+  type        = string
 }
 
 variable "tags" {
