@@ -1,24 +1,35 @@
-output "vnet_id" {
-  description = "ID of the virtual network"
-  value       = azurerm_virtual_network.main.id
+variable "resource_group_name" {
+  description = "Name of the resource group"
+  type        = string
 }
 
-output "vnet_name" {
+variable "location" {
+  description = "Azure region for resources"
+  type        = string
+}
+
+variable "vnet_name" {
   description = "Name of the virtual network"
-  value       = azurerm_virtual_network.main.name
+  type        = string
 }
 
-output "subnet_id" {
-  description = "ID of the subnet"
-  value       = azurerm_subnet.main.id
+variable "vnet_address_space" {
+  description = "Address space for the virtual network"
+  type        = list(string)
 }
 
-output "subnet_name" {
+variable "subnet_name" {
   description = "Name of the subnet"
-  value       = azurerm_subnet.main.name
+  type        = string
 }
 
-output "nsg_id" {
-  description = "ID of the network security group"
-  value       = azurerm_network_security_group.main.id
+variable "subnet_address_prefixes" {
+  description = "Address prefixes for the subnet"
+  type        = list(string)
+}
+
+variable "tags" {
+  description = "Tags to apply to resources"
+  type        = map(string)
+  default     = {}
 }
