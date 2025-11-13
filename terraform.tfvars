@@ -1,3 +1,5 @@
+# Copy this file to terraform.tfvars and customize the values
+
 resource_group_name  = "sample-rg"
 location             = "westeurope"
 vnet_name            = "my-vnet"
